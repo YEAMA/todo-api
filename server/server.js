@@ -22,6 +22,15 @@ app.post('/todos', (req, res) => {
         })
 })
 
+app.get('/todos', (req, res) => {
+    Todo.find().then((todos) => {
+        res.send({ todos, status: res.statusCode })
+    }, (e) => {
+        console.log(e)
+        res.status.send(e)
+    })
+})
+
 app.listen(3000, () => {
     console.log('Server Started on port 3000')
 })
