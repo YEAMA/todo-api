@@ -58,3 +58,35 @@ describe('GET /todos', () => {
             })
     })
 })
+
+describe('GET /todos/:title', () => {
+    var title = 'Title';
+
+    it('should return specific todos', (done) => {
+        request(app)
+            .get('/todos/Title')
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.length).toBeGreaterThan(0)
+            })
+            .end((e, res) => {
+                if (e) return done(e);
+                done();
+            })
+    });
+
+    title = null;
+
+    it('should return 404 for nonfound', (done) => {
+        request(app)
+            .get('/todos/' + title)
+            .expect(404)
+            .expect((res) => {
+                expect(res.error.text).toBe("No matched todos")
+            })
+            .end((e, res) => {
+                if (e) return done(e);
+                done();
+            })
+    });
+});
