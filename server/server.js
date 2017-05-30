@@ -31,6 +31,14 @@ app.get('/todos', (req, res) => {
     })
 })
 
+app.get('/todos/:title', (req, res) => {
+    Todo.find({ title: req.params.title }).then((todos) => {
+        if (todos.length === 0)
+            res.status(404).send("No matched todos")
+        res.send(todos)
+    }, (e) => res.status(400).send(e))
+})
+
 app.listen(3000, () => {
     console.log('Server Started on port 3000')
 })
