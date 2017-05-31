@@ -90,3 +90,32 @@ describe('GET /todos/:title', () => {
             })
     });
 });
+
+
+describe('DELETE /todos/:title', () => {
+    it('should delete todo by title', (done) => {
+        request(app)
+            .delete('/todos/' + 'From postman 3')
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.title).toBe('From postman 3')
+            })
+            .end((e, res) => {
+                if (e) return done(e)
+                done()
+            })
+    });
+
+    it('should not delete todo for unknown todo title', (done) => {
+        request(app)
+            .delete('/todos/' + 'From postman 3')
+            .expect(404)
+            .expect((res) => {
+                expect(res.error.text).toBe("No matched todo to delete")
+            })
+            .end((e, res) => {
+                if (e) return done(e)
+                done()
+            })
+    });
+})

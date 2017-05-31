@@ -40,6 +40,15 @@ app.get('/todos/:title', (req, res) => {
     }, (e) => res.status(400).send(e))
 })
 
+app.delete('/todos/:title', (req, res) => {
+    Todo.findOneAndRemove({ title: req.params.title }).then((doc) => {
+        if (!doc)
+            res.status(404).send('No matched todo to delete')
+
+        res.status(200).send(doc);
+    }, (e) => res.status(400).send(e))
+})
+
 app.listen(port, () => {
     console.log(`Server Started on port ${port}`)
 })
