@@ -10,6 +10,18 @@ var app = express()
 const port = process.env.PORT || 3000;
 app.use(bodyParser.json())
 
+app.post('/users', (req, res) => {
+    var userData = _.pick(req.body, ['email', 'password'])
+    var user = new User(userData)
+
+    user.save()
+        .then((doc) => {
+            res.status(200).send(doc)
+        }, (e) => {
+            res.status(400).send(e)
+        })
+})
+
 app.post('/todos', (req, res) => {
     var todo = new Todo({
         title: req.body.title,
