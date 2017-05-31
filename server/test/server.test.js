@@ -95,10 +95,10 @@ describe('GET /todos/:title', () => {
 describe('DELETE /todos/:title', () => {
     it('should delete todo by title', (done) => {
         request(app)
-            .delete('/todos/' + 'From postman 3')
+            .delete('/todos/' + 'From test server')
             .expect(200)
             .expect((res) => {
-                expect(res.body.title).toBe('From postman 3')
+                expect(res.body.title).toBe('From test server')
             })
             .end((e, res) => {
                 if (e) return done(e)
@@ -118,4 +118,42 @@ describe('DELETE /todos/:title', () => {
                 done()
             })
     });
+})
+
+describe('PATCH /todos/:title', () => {
+    var body = {
+        "title": "From test server",
+        "text": "This is a required thing from test!",
+        "completedAt": 25,
+        "completed": true
+    }
+
+    it('should update the todo', (done) => {
+        request(app)
+            .patch('/todos/' + 'Title')
+            .send(body)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.doc.title).toBe(body.title)
+                expect(res.body.doc.completedAt).toNotBe(body.completedAt)
+            })
+            .end((e, res) => {
+                if (e) return done(e)
+                done()
+            })
+    });
+
+    it('should not update absent todo', (done) => {
+        request(app)
+            .patch('/todos/' + 'Title')
+            .send(body)
+            .expect(404)
+            .expect((res) => {
+                expect(res.error.text).toBe("No todo found to update")
+            })
+            .end((e, res) => {
+                if (e) return done(e)
+                done()
+            })
+    })
 })

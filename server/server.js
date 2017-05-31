@@ -1,5 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const _ = require('lodash')
 
 const { mongoose } = require('./db/mongoose.js')
 const { Todo } = require('./models/todo')
@@ -27,7 +28,6 @@ app.get('/todos', (req, res) => {
     Todo.find().then((todos) => {
         res.send({ todos, status: res.statusCode })
     }, (e) => {
-        console.log(e)
         res.status.send(e)
     })
 })
@@ -35,7 +35,7 @@ app.get('/todos', (req, res) => {
 app.get('/todos/:title', (req, res) => {
     Todo.find({ title: req.params.title }).then((todos) => {
         if (todos.length === 0)
-            res.status(404).send("No matched todos")
+            return res.status(404).send("No matched todos")
         res.send(todos)
     }, (e) => res.status(400).send(e))
 })
@@ -43,10 +43,30 @@ app.get('/todos/:title', (req, res) => {
 app.delete('/todos/:title', (req, res) => {
     Todo.findOneAndRemove({ title: req.params.title }).then((doc) => {
         if (!doc)
-            res.status(404).send('No matched todo to delete')
+            return res.status(404).send('No matched todo to delete')
 
         res.status(200).send(doc);
     }, (e) => res.status(400).send(e))
+})
+
+app.patch('/todos/:title', (req, res) => {
+    var title = req.params.title;
+    var body = _.pick(req.body, ['title', 'text', 'completed']);
+
+    if (_.isBoolean(body.completed) && body.completed)
+        body.completedAt = new Date().getTime()
+    else {
+        body.completed = false;
+        body.completedAt = null;
+    }
+
+    Todo.findOneAndUpdate({ title }, { $set: body }, { new: true })
+        .then((doc) => {
+            if (!doc)
+                return res.status(404).send('No todo found to update')
+
+            res.status(200).send({ doc })
+        }, (e) => res.status(400).send(e))
 })
 
 app.listen(port, () => {
