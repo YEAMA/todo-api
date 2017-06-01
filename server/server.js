@@ -5,6 +5,7 @@ const _ = require('lodash')
 const { mongoose } = require('./db/mongoose.js')
 const { Todo } = require('./models/todo')
 const { User } = require('./models/user')
+const { authenticate } = require('./middleware/authenticate')
 
 var app = express()
 const port = process.env.PORT || 3000;
@@ -26,7 +27,13 @@ app.post('/users', (req, res) => {
         })
 })
 
-app.post('/todos', (req, res) => {
+
+
+app.get('/user/me', authenticate, (req, res) => {
+    res.send(req.user)
+})
+
+app.post('/todos', authenticate, (req, res) => {
     var todo = new Todo({
         title: req.body.title,
         text: req.body.text
@@ -40,7 +47,7 @@ app.post('/todos', (req, res) => {
         })
 })
 
-app.get('/todos', (req, res) => {
+app.get('/todos', authenticate, (req, res) => {
     Todo.find().then((todos) => {
         res.send({ todos, status: res.statusCode })
     }, (e) => {
@@ -48,7 +55,7 @@ app.get('/todos', (req, res) => {
     })
 })
 
-app.get('/todos/:title', (req, res) => {
+app.get('/todos/:title', authenticate, (req, res) => {
     Todo.find({ title: req.params.title }).then((todos) => {
         if (todos.length === 0)
             return res.status(404).send("No matched todos")
@@ -56,7 +63,7 @@ app.get('/todos/:title', (req, res) => {
     }, (e) => res.status(400).send(e))
 })
 
-app.delete('/todos/:title', (req, res) => {
+app.delete('/todos/:title', authenticate, (req, res) => {
     Todo.findOneAndRemove({ title: req.params.title }).then((doc) => {
         if (!doc)
             return res.status(404).send('No matched todo to delete')
@@ -65,7 +72,7 @@ app.delete('/todos/:title', (req, res) => {
     }, (e) => res.status(400).send(e))
 })
 
-app.patch('/todos/:title', (req, res) => {
+app.patch('/todos/:title', authenticate, (req, res) => {
     var title = req.params.title;
     var body = _.pick(req.body, ['title', 'text', 'completed']);
 
