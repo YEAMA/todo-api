@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 const jwt = require('jsonwebtoken')
 const _ = require('lodash')
+const bcrypt = require('bcryptjs')
 
 var UserSchema = new mongoose.Schema({
     email: {
@@ -33,6 +34,18 @@ var UserSchema = new mongoose.Schema({
         }
     }]
 })
+
+// Instance method
+UserSchema.pre('save', function(next) {
+    var user = this;
+    if (user.isModified('password')) {
+        var password = user.password
+        var hash = bcrypt.hashSync(password, 10);
+        user.password = hash
+    }
+
+    next();
+});
 
 // Overriding an existing express method
 UserSchema.methods.toJSON = function() {
