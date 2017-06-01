@@ -13,7 +13,7 @@ var authenticate = (req, res, next) => {
             next()
         })
         .catch((e) => {
-            console.log("\n\n== Did not authenticate correctly ==")
+            console.log("\n\n== Did not authenticate correctly ==\n\n")
             res.status(401).send(e)
         })
 }

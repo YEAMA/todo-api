@@ -1,6 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const _ = require('lodash')
+const bcrypt = require('bcryptjs')
 
 const { mongoose } = require('./db/mongoose.js')
 const { Todo } = require('./models/todo')
@@ -27,6 +28,16 @@ app.post('/users', (req, res) => {
         })
 })
 
+app.post('/user/login', (req, res) => {
+
+    User.findByCredentials(req.body.email, req.body.password)
+        .then((user) => {
+            return user.generateAuthToken().then((token) => {
+                res.header('x-auth', token).send(user)
+            })
+        })
+        .catch((e) => res.status(400).send(e))
+})
 
 
 app.get('/user/me', authenticate, (req, res) => {
