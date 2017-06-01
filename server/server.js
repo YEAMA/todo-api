@@ -44,6 +44,16 @@ app.get('/user/me', authenticate, (req, res) => {
     res.send(req.user)
 })
 
+app.delete('/user/me/', authenticate, (req, res) => {
+    req.user.removeToken(req.token)
+        .then(() => {
+            res.send("Token deleted successfully")
+        }, (e) => {
+            res.status(400).send("Error!")
+        })
+
+})
+
 app.post('/todos', authenticate, (req, res) => {
     var todo = new Todo({
         title: req.body.title,
