@@ -57,7 +57,8 @@ app.delete('/user/me/', authenticate, (req, res) => {
 app.post('/todos', authenticate, (req, res) => {
     var todo = new Todo({
         title: req.body.title,
-        text: req.body.text
+        text: req.body.text,
+        _creator: req.user._id
     })
 
     todo.save()
@@ -69,7 +70,7 @@ app.post('/todos', authenticate, (req, res) => {
 })
 
 app.get('/todos', authenticate, (req, res) => {
-    Todo.find().then((todos) => {
+    Todo.find({ _creator: req.user._id }).then((todos) => {
         res.send({ todos, status: res.statusCode })
     }, (e) => {
         res.status.send(e)
@@ -77,7 +78,7 @@ app.get('/todos', authenticate, (req, res) => {
 })
 
 app.get('/todos/:title', authenticate, (req, res) => {
-    Todo.find({ title: req.params.title }).then((todos) => {
+    Todo.find({ title: req.params.title, _creator: req.user._id }).then((todos) => {
         if (todos.length === 0)
             return res.status(404).send("No matched todos")
         res.send(todos)
@@ -85,7 +86,7 @@ app.get('/todos/:title', authenticate, (req, res) => {
 })
 
 app.delete('/todos/:title', authenticate, (req, res) => {
-    Todo.findOneAndRemove({ title: req.params.title }).then((doc) => {
+    Todo.findOneAndRemove({ title: req.params.title, _creator: req.user._id }).then((doc) => {
         if (!doc)
             return res.status(404).send('No matched todo to delete')
 
@@ -104,7 +105,7 @@ app.patch('/todos/:title', authenticate, (req, res) => {
         body.completedAt = null;
     }
 
-    Todo.findOneAndUpdate({ title }, { $set: body }, { new: true })
+    Todo.findOneAndUpdate({ title, _creator: req.user._id }, { $set: body }, { new: true })
         .then((doc) => {
             if (!doc)
                 return res.status(404).send('No todo found to update')
